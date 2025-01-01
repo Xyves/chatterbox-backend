@@ -1,4 +1,3 @@
-const db = require("../db/query");
 const jwt = require("jsonwebtoken");
 const { createUser, getUserByName, getUserById } = require("../db/query");
 const bcrypt = require("bcrypt");
@@ -43,6 +42,14 @@ async function login(req, res) {
     res.status(500).json({ error: "Login failed" });
   }
 }
+async function logout(req, res, next) {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/blogs");
+  });
+}
 async function signup(req, res) {
   const { nickname, password, email, role } = req.body;
   console.log(req.body);
@@ -52,7 +59,13 @@ async function signup(req, res) {
   try {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    const user = await createUser(nickname, hashedPassword, email, role);
+    const user = await createUser(
+      nickname,
+      hashedPassword,
+      email,
+      bio,
+      avatar_url
+    );
 
     const token = jwt.sign(
       {
@@ -124,6 +137,13 @@ function getProfile(req, res) {
     res.status(400).send("Invalid Token");
   }
 }
+async function getUser(req, res) {
+  const { id } = req.params;
+  const user = await getUserById(id);
+  console.log(user);
+  res.json(user);
+}
+
 module.exports = {
   login,
   getProfile,
@@ -131,4 +151,5 @@ module.exports = {
   validateMiddleware,
   createUserValidation,
   getUser,
+  logout,
 };
