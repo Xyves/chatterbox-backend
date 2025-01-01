@@ -8,8 +8,7 @@ authRouter.post(
   authController.signup
 );
 authRouter.get("/auth/logout", authController.logout);
-authRouter.get("/auth/:id", authController.getUser);
-userRouter.get("/user/me", authController.getProfile);
-userRouter.get("/user/:id", authController.getUser);
+authRouter.get("/user/me", authController.getProfile);
+authRouter.get("/user/:id", authController.getUser);
 
 module.exports = authRouter;
