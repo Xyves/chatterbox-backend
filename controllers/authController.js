@@ -34,7 +34,7 @@ async function login(req, res) {
           console.error("Error generating token:", err);
           return res.status(500).json({ error: "Error generating token" });
         }
-        res.json({ token }); // Return the token
+        res.json({ token, id }); // Return the token
       }
     );
   } catch (error) {

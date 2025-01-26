@@ -1,30 +1,17 @@
 const db = require("../db/query");
-async function getChat(req, res) {
+async function getChatWithMessages(req, res) {
   const { userId, user2Id } = req.body;
   const chat = await db.getChat(userId, user2Id);
-  res.json(chat);
-}
-async function getChatById(req, res) {
-  const { chat_id } = req.params;
-  const chat = db.getChatById(chat_id);
-  res.json(chat);
-}
-async function getChatMessages(req, res) {
-  const { chat_id } = req.params;
-  const messages = await db.getChatMessages(chat_id);
+  const messages = await db.getChatMessages(chat.id);
   res.json(messages);
 }
+
 async function getMessageById(req, res) {
   const { message_id } = req.params;
   const message = await db.getMessageById(message_id);
   res.json(message);
 }
 
-async function createChat(req, res) {
-  const { id, user1_id, user2_id } = req.body;
-  const chat = await db.createChat(id, user1_id, user2_id);
-  res.json(chat);
-}
 async function createMessage(req, res) {
   const { chat_id } = req.params;
   const time = Math.floor(Date.now() / 1000);
@@ -32,11 +19,14 @@ async function createMessage(req, res) {
   const message = await db.createMessage(chat_id, id, user_id, content, time);
   res.json(message);
 }
+async function getFriends(req, res) {
+  const user_id = req.body.user_id;
+  const friends = await db.fetchFriends(user_id);
+  res.json(friends);
+}
 module.exports = {
-  getChat,
-  getChatById,
-  getChatMessages,
+  getChatWithMessages,
   getMessageById,
-  createChat,
   createMessage,
+  getFriends,
 };
