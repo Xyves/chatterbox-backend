@@ -1,11 +1,30 @@
 const { PrismaClient } = require("@prisma/client");
+const { uuid } = require("uuidv4");
 const prisma = new PrismaClient();
 
 // Chat
-const getChat = (id_1, id_2) => {
-  return prisma.chat.findUnique({
-    where: { AND: [{ user1_id: id_1 }, { user2_id: id_2 }] },
+const getChat = async (id_1, id_2) => {
+  let chat = await prisma.chat.findFirst({
+    where: {
+      OR: [
+        { AND: [{ user1_id: id_1 }, { user2_id: id_2 }] },
+        { AND: [{ user1_id: id_2 }, { user2_id: id_1 }] },
+      ],
+    },
   });
+
+  if (!chat) {
+    const id = uuid();
+    chat = await prisma.chat.create({
+      data: {
+        id: id,
+        user1_id: id_1,
+        user2_id: id_2,
+      },
+    });
+  }
+
+  return chat;
 };
 const createChat = (id, user1_id, user2_id) => {
   return prisma.chat.create({ data: { id, user1_id, user2_id } });
@@ -62,6 +81,16 @@ const getUserById = (id) => {
     },
   });
 };
+const fetchFriends = (user_id) => {
+  return prisma.user.findMany({
+    where: {
+      id: {
+        not: user_id,
+      },
+    },
+    select: { id: true, nickname: true, bio: true, avatar_url: true },
+  });
+};
 module.exports = {
   createUser,
   getUserByName,
@@ -71,4 +100,5 @@ module.exports = {
   getChatMessages,
   getMessageById,
   createMessage,
+  fetchFriends,
 };
