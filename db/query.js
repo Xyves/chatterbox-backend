@@ -46,11 +46,12 @@ const createMessage = async (chat_id, id, user_id, content, time) => {
 };
 
 // USER
-const getUserByName = (nickname) => {
+const getUserByName = (username) => {
   return prisma.user.findUnique({
-    where: nickname,
+    where: { nickname: username },
     select: {
       id: true,
+      password: true,
       nickname: true,
       email: true,
       bio: true,
@@ -62,10 +63,10 @@ const createUser = async (nickname, hashedPassword, email, bio, avatar_url) => {
   return prisma.user.create({
     data: {
       nickname,
-      hashedPassword,
+      password: hashedPassword,
       email,
-      bio,
-      avatar_url,
+      bio: bio ?? "",
+      avatar_url: avatar_url ?? "",
     },
   });
 };
