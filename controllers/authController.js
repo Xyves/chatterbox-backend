@@ -3,40 +3,48 @@ const { createUser, getUserByName, getUserById } = require("../db/query");
 const bcrypt = require("bcrypt");
 const { body, validationResult } = require("express-validator");
 async function login(req, res) {
-  console.log("Attempting login");
   try {
+    console.log("Trying to log in");
     const { password, nickname } = req.body;
 
     const user = await getUserByName(nickname);
+    console.log("user:", user.nickname, user.password);
 
     if (!user) {
       return res
         .status(401)
         .json({ error: "Authentication failed: user not found" });
     }
-
+    console.log("User found:", user.nickname);
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       console.log("Incorrect password");
       return res.status(401).json({ error: "Incorrect password" });
     }
 
-    console.log("Username and password worked");
+    console.log("Login successful");
 
-    // Generate JWT token
     const secret = process.env.SECRET_KEY;
-    jwt.sign(
-      { user: { id: user.id, nickname: user.nickname, role: user.role } },
-      secret,
-      { expiresIn: "30m" },
-      (err, token) => {
-        if (err) {
-          console.error("Error generating token:", err);
-          return res.status(500).json({ error: "Error generating token" });
-        }
-        res.json({ token, id }); // Return the token
-      }
-    );
+    if (!secret) {
+      console.error("Secret key is not defined in environment variables");
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    try {
+      const token = jwt.sign(
+        { user: { id: user.id, nickname: user.nickname } },
+        secret,
+        { expiresIn: "60m" }
+      );
+
+      console.log("Token generated:", token);
+
+      // Send response with token and user ID
+      res.json({ userToken: token, id: user.id });
+    } catch (err) {
+      console.error("Error generating token:", err);
+      return res.status(500).json({ error: "Error generating token" });
+    }
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Login failed" });
@@ -51,7 +59,7 @@ async function logout(req, res, next) {
   });
 }
 async function signup(req, res) {
-  const { nickname, password, email, role } = req.body;
+  const { nickname, password, email } = req.body;
   console.log(req.body);
   if (!nickname || !password || !email) {
     return res.status(400).json({ error: "All fields are required" });
@@ -62,9 +70,10 @@ async function signup(req, res) {
     const user = await createUser(
       nickname,
       hashedPassword,
-      email,
-      bio,
-      avatar_url
+      email
+      // (bio = ""),
+
+      // avatar_url
     );
 
     const token = jwt.sign(
@@ -73,10 +82,9 @@ async function signup(req, res) {
         nickname: nickname,
         email,
         password: hashedPassword,
-        role: role,
       },
       process.env.SECRET_KEY,
-      { expiresIn: "15m" }
+      { expiresIn: "60m" }
     );
     res.status(201).json({ token });
   } catch (error) {
