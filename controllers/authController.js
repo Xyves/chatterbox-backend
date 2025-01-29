@@ -21,9 +21,7 @@ async function login(req, res) {
       console.log("Incorrect password");
       return res.status(401).json({ error: "Incorrect password" });
     }
-
     console.log("Login successful");
-
     const secret = process.env.SECRET_KEY;
     if (!secret) {
       console.error("Secret key is not defined in environment variables");
@@ -37,9 +35,6 @@ async function login(req, res) {
         { expiresIn: "60m" }
       );
 
-      console.log("Token generated:", token);
-
-      // Send response with token and user ID
       res.json({ userToken: token, id: user.id });
     } catch (err) {
       console.error("Error generating token:", err);

@@ -3,9 +3,7 @@ const chatRouter = Router();
 const chatsController = require("../controllers/chatController");
 
 chatRouter.get("/friends", chatsController.getFriends);
-chatRouter.get("/:chat_id", chatsController.getChatById);
-
-chatRouter.post("/", chatsController.createChat);
+chatRouter.get("/:chat_id", chatsController.getChatWithMessages);
 chatRouter.post("/:chat_id/messages", chatsController.createMessage);
 
 module.exports = chatRouter;
