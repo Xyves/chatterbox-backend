@@ -35,7 +35,7 @@ async function login(req, res) {
         { expiresIn: "60m" }
       );
 
-      res.json({ userToken: token, id: user.id });
+      res.json({ userToken: token, id: user.id, nickname: user.nickname });
     } catch (err) {
       console.error("Error generating token:", err);
       return res.status(500).json({ error: "Error generating token" });
@@ -118,7 +118,7 @@ function validateMiddleware(req, res, next) {
   }
   next();
 }
-function getProfile(req, res) {
+async function getProfile(req, res) {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     console.error("No token found, access denied");
@@ -126,16 +126,14 @@ function getProfile(req, res) {
   }
   try {
     const verifiedUser = jwt.verify(token, process.env.SECRET_KEY);
-    console.log("Verified user:", verifiedUser.user.nickname);
+    console.log("Decoded JWT:", verifiedUser);
     if (!verifiedUser) {
       console.error("User not found in database");
       return res.status(404).send("User not found");
     }
-    res.json({
-      id: verifiedUser.user.id,
-      nickname: verifiedUser.user.nickname,
-      role: verifiedUser.user.role,
-    });
+    const user = await getUserById(verifiedUser.user.id);
+
+    res.json(user);
   } catch (error) {
     res.status(400).send("Invalid Token");
   }
