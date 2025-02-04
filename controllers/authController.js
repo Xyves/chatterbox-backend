@@ -8,9 +8,10 @@ async function login(req, res) {
     const { password, nickname } = req.body;
 
     const user = await getUserByName(nickname);
-    console.log("user:", user.nickname, user.password);
+    // console.log("user:", user.nickname, user.password);
 
     if (!user) {
+      console.log("user not found");
       return res
         .status(401)
         .json({ error: "Authentication failed: user not found" });

@@ -22,7 +22,7 @@ model User {
   nickname   String  @unique
   password   String  @unique
   email      String  @unique
-  bio        String  @unique
+  bio        String? @unique
   avatar_url String?
 }
 
