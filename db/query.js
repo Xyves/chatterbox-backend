@@ -59,14 +59,20 @@ const getUserByName = (username) => {
     },
   });
 };
-const createUser = async (nickname, hashedPassword, email, bio, avatar_url) => {
+const createUser = async (
+  nickname,
+  hashedPassword,
+  email,
+  bio = null,
+  avatar_url = null
+) => {
   return prisma.user.create({
     data: {
       nickname,
       password: hashedPassword,
       email,
-      bio: bio ?? "",
-      avatar_url: avatar_url ?? "",
+      bio,
+      avatar_url,
     },
   });
 };
