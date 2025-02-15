@@ -26,14 +26,47 @@ const getChat = async (id_1, id_2) => {
 
   return chat;
 };
+const getChatId = async (user_1_id, user_2_id) => {
+  let chat = await prisma.chat.findFirst({
+    select: { id: true },
+    where: {
+      OR: [
+        { AND: [{ user1_id: user_1_id }, { user2_id: user_2_id }] },
+        { AND: [{ user1_id: user_2_id }, { user2_id: user_1_id }] },
+      ],
+    },
+  });
+
+  if (!chat) {
+    const id = uuid();
+    chat = await prisma.chat.create({
+      data: {
+        id: id,
+        user1_id: user_1_id,
+        user2_id: user_2_id,
+      },
+    });
+  }
+
+  return chat.id;
+};
 const createChat = (id, user1_id, user2_id) => {
   return prisma.chat.create({ data: { id, user1_id, user2_id } });
 };
 
 // Messages
-const getChatMessages = async (chat_id) => {
+const getChatMessages = async (chat_id, user1_id, user2_id) => {
   return prisma.message.findMany({
-    where: { chat_id },
+    where: {
+      chat_id,
+      OR: [
+        { AND: [{ user1_id }, { user2_id }] },
+        { AND: [{ user1_id: user2_id }, { user2_id: user1_id }] },
+      ],
+    },
+    orderBy: {
+      time: "desc",
+    },
   });
 };
 const getMessageById = async (id) => {
@@ -108,4 +141,5 @@ module.exports = {
   getMessageById,
   createMessage,
   fetchFriends,
+  getChatId,
 };
