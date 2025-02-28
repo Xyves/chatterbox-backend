@@ -1,9 +1,14 @@
+const { uuid } = require("uuidv4");
 const db = require("../db/query");
-async function getChatWithMessages(req, res) {
-  const { userId, user2Id } = req.body;
-  const chat = await db.getChat(userId, user2Id);
-  const messages = await db.getChatMessages(chat.id);
-  res.json(messages);
+async function getChatMessages(req, res) {
+  const { user1_id, user2_id } = req.body;
+  const { chat_id } = req.params;
+  try {
+    const messages = await db.getChatMessages(chat_id, user1_id, user2_id);
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching chat messages" });
+  }
 }
 
 async function getMessageById(req, res) {
@@ -15,17 +20,28 @@ async function getMessageById(req, res) {
 async function createMessage(req, res) {
   const { chat_id } = req.params;
   const time = Math.floor(Date.now() / 1000);
-  const { id, user_id, content } = req.body;
+  const id = uuid();
+  console.log(time);
+  const { user_id, content } = req.body;
   const message = await db.createMessage(chat_id, id, user_id, content, time);
+  console.log("Created message:", message);
   res.json(message);
 }
 async function getFriends(req, res) {
-  const user_id = req.body.user_id;
-  const friends = await db.fetchFriends(user_id);
-  res.json(friends);
+  const { user_nickname } = req.query;
+  const { id } = db.getUserByName(user_nickname);
+  const friends = await db.fetchFriends(id);
+  const friendsWithChats = await Promise.all(
+    friends.map(async (friend) => {
+      const chat_id = await db.getChatId(friend.id, id);
+      return { ...friend, chat_id };
+    })
+  );
+
+  res.json(friendsWithChats);
 }
 module.exports = {
-  getChatWithMessages,
+  getChatMessages,
   getMessageById,
   createMessage,
   getFriends,
