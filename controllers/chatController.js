@@ -1,10 +1,11 @@
 const { uuid } = require("uuidv4");
 const db = require("../db/query");
 async function getChatMessages(req, res) {
-  const { user1_id, user2_id } = req.body;
   const { chat_id } = req.params;
+  console.log(chat_id);
   try {
-    const messages = await db.getChatMessages(chat_id, user1_id, user2_id);
+    const messages = await db.getChatMessages(chat_id);
+    console.log("Fetched messeges are:", messages);
     res.json(messages);
   } catch (error) {
     res.status(500).json({ error: "Error fetching chat messages" });
@@ -20,10 +21,11 @@ async function getMessageById(req, res) {
 async function createMessage(req, res) {
   const { chat_id } = req.params;
   const time = Math.floor(Date.now() / 1000);
-  const id = uuid();
+  const id = v4();
   console.log(time);
-  const { user_id, content } = req.body;
-  const message = await db.createMessage(chat_id, id, user_id, content, time);
+  const { sender_id, content } = req.body;
+  console.log(sender_id);
+  const message = await db.createMessage(chat_id, id, sender_id, content, time);
   console.log("Created message:", message);
   res.json(message);
 }

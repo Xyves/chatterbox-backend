@@ -4,11 +4,11 @@ const chatsController = require("../controllers/chatController");
 const { verifyToken } = require("../controllers/authController");
 
 chatRouter.get("/friends", verifyToken, chatsController.getFriends);
-chatRouter.get("/:chat_id", verifyToken, chatsController.getChatMessages);
-chatRouter.post(
-  "/:chat_id/messages",
+chatRouter.get(
+  "/:chat_id/message",
   verifyToken,
-  chatsController.createMessage
+  chatsController.getChatMessages
 );
+chatRouter.post("/:chat_id/message", chatsController.createMessage);
 
 module.exports = chatRouter;

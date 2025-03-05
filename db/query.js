@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { uuid } = require("uuidv4");
+const { v4 } = require("uuidv4");
 const prisma = new PrismaClient();
 
 // Chat
@@ -55,14 +55,10 @@ const createChat = (id, user1_id, user2_id) => {
 };
 
 // Messages
-const getChatMessages = async (chat_id, user1_id, user2_id) => {
+const getChatMessages = async (chat_id) => {
   return prisma.message.findMany({
     where: {
-      chat_id,
-      OR: [
-        { AND: [{ user1_id }, { user2_id }] },
-        { AND: [{ user1_id: user2_id }, { user2_id: user1_id }] },
-      ],
+      chat_id: chat_id,
     },
     orderBy: {
       time: "desc",
@@ -72,9 +68,9 @@ const getChatMessages = async (chat_id, user1_id, user2_id) => {
 const getMessageById = async (id) => {
   return prisma.message.findUnique({ where: { id } });
 };
-const createMessage = async (chat_id, id, user_id, content, time) => {
+const createMessage = async (chat_id, id, sender_id, content, time) => {
   return prisma.message.create({
-    data: { chat_id, id, sender_id: user_id, content, time },
+    data: { chat_id, id, sender_id, content, time },
   });
 };
 
