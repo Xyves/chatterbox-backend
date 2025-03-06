@@ -63,14 +63,7 @@ async function signup(req, res) {
   try {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    const user = await createUser(
-      nickname,
-      hashedPassword,
-      email
-      // (bio = ""),
-
-      // avatar_url
-    );
+    const user = await createUser(nickname, hashedPassword, email);
 
     const token = jwt.sign(
       {
@@ -139,6 +132,21 @@ async function getProfile(req, res) {
     res.status(400).send("Invalid Token");
   }
 }
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Get token from request headers
+
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized: No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Token expired or invalid" });
+  }
+};
 async function getUser(req, res) {
   const { id } = req.params;
   const user = await getUserById(id);
@@ -154,4 +162,5 @@ module.exports = {
   createUserValidation,
   getUser,
   logout,
+  verifyToken,
 };

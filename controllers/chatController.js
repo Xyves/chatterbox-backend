@@ -21,7 +21,7 @@ async function getMessageById(req, res) {
 async function createMessage(req, res) {
   const { chat_id } = req.params;
   const time = Math.floor(Date.now() / 1000);
-  const id = v4();
+  const id = uuid();
   console.log(time);
   const { sender_id, content } = req.body;
   console.log(sender_id);

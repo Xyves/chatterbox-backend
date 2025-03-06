@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { v4 } = require("uuidv4");
+const { uuid } = require("uuidv4");
 const prisma = new PrismaClient();
 
 // Chat
