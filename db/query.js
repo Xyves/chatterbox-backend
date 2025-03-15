@@ -57,11 +57,12 @@ const createChat = (id, user1_id, user2_id) => {
 // Messages
 const getChatMessages = async (chat_id) => {
   return prisma.message.findMany({
+    take: 50,
     where: {
       chat_id: chat_id,
     },
     orderBy: {
-      time: "desc",
+      time: "asc",
     },
   });
 };

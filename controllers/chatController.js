@@ -30,17 +30,23 @@ async function createMessage(req, res) {
   res.json(message);
 }
 async function getFriends(req, res) {
-  const { user_nickname } = req.query;
-  const { id } = db.getUserByName(user_nickname);
-  const friends = await db.fetchFriends(id);
-  const friendsWithChats = await Promise.all(
-    friends.map(async (friend) => {
-      const chat_id = await db.getChatId(friend.id, id);
-      return { ...friend, chat_id };
-    })
-  );
+  try {
+    const { user_nickname } = req.query;
+    const { id } = await db.getUserByName(user_nickname);
 
-  res.json(friendsWithChats);
+    const friends = await db.fetchFriends(id);
+    const friendsWithChats = await Promise.all(
+      friends.map(async (friend) => {
+        const chat_id = await db.getChatId(friend.id, id);
+        return { ...friend, chat_id };
+      })
+    );
+
+    res.json(friendsWithChats);
+  } catch (error) {
+    console.error("Error fetching friends:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 module.exports = {
   getChatMessages,
