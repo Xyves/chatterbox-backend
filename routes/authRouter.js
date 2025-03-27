@@ -9,6 +9,7 @@ authRouter.post(
 );
 authRouter.get("/auth/logout", authController.logout);
 authRouter.get("/user/me", authController.getProfile);
+authRouter.patch("/user", authController.updateUserController);
 authRouter.get("/user/:id", authController.getUser);
 
 module.exports = authRouter;

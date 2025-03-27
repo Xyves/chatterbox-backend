@@ -1,28 +1,27 @@
 const jwt = require("jsonwebtoken");
-const { createUser, getUserByName, getUserById } = require("../db/query");
+const {
+  createUser,
+  getUserByName,
+  getUserById,
+  updateUser,
+} = require("../db/query");
 const bcrypt = require("bcrypt");
 const { body, validationResult } = require("express-validator");
 async function login(req, res) {
   try {
-    console.log("Trying to log in");
     const { password, nickname } = req.body;
 
     const user = await getUserByName(nickname);
-    // console.log("user:", user.nickname, user.password);
 
     if (!user) {
-      console.log("user not found");
       return res
         .status(401)
         .json({ error: "Authentication failed: user not found" });
     }
-    console.log("User found:", user.nickname);
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      console.log("Incorrect password");
       return res.status(401).json({ error: "Incorrect password" });
     }
-    console.log("Login successful");
     const secret = process.env.SECRET_KEY;
     if (!secret) {
       console.error("Secret key is not defined in environment variables");
@@ -56,7 +55,6 @@ async function logout(req, res, next) {
 }
 async function signup(req, res) {
   const { nickname, password, email } = req.body;
-  console.log(req.body);
   if (!nickname || !password || !email) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -120,7 +118,7 @@ async function getProfile(req, res) {
   }
   try {
     const verifiedUser = jwt.verify(token, process.env.SECRET_KEY);
-    console.log("Decoded JWT:", verifiedUser);
+    // console.log("Decoded JWT:", verifiedUser);
     if (!verifiedUser) {
       console.error("User not found in database");
       return res.status(404).send("User not found");
@@ -133,7 +131,7 @@ async function getProfile(req, res) {
   }
 }
 const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Get token from request headers
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ error: "Unauthorized: No token provided" });
@@ -150,10 +148,13 @@ const verifyToken = (req, res, next) => {
 async function getUser(req, res) {
   const { id } = req.params;
   const user = await getUserById(id);
-  console.log(user);
   res.json(user);
 }
-
+async function updateUserController(req, res) {
+  const { email, bio, avatar_url, id } = req.body;
+  const user = await updateUser(email, bio, avatar_url, id);
+  res.status(200).json(user);
+}
 module.exports = {
   login,
   getProfile,
@@ -163,4 +164,5 @@ module.exports = {
   getUser,
   logout,
   verifyToken,
+  updateUserController,
 };

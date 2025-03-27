@@ -128,6 +128,14 @@ const fetchFriends = (user_id) => {
     select: { id: true, nickname: true, bio: true, avatar_url: true },
   });
 };
+const updateUser = (email, bio, avatar_url, id) => {
+  return prisma.user.update({
+    where: {
+      id: id,
+    },
+    data: { email, bio, avatar_url },
+  });
+};
 module.exports = {
   createUser,
   getUserByName,
@@ -139,4 +147,5 @@ module.exports = {
   createMessage,
   fetchFriends,
   getChatId,
+  updateUser,
 };
