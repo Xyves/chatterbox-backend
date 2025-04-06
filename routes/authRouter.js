@@ -3,7 +3,7 @@ const authController = require("../controllers/authController");
 authRouter.post("/auth/login", authController.login);
 authRouter.post(
   "/auth/register",
-  // authController.createUserValidation,
+  authController.createUserValidation,
   authController.validateMiddleware,
   authController.signup
 );

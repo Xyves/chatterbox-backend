@@ -32,7 +32,7 @@ async function login(req, res) {
       const token = jwt.sign(
         { user: { id: user.id, nickname: user.nickname } },
         secret,
-        { expiresIn: "60m" }
+        { expiresIn: "40m" }
       );
 
       res.json({ userToken: token, id: user.id, nickname: user.nickname });
@@ -94,13 +94,9 @@ function createUserValidation() {
       .withMessage("Username should not contain spaces"),
 
     body("password")
-      .isLength({ min: 5, max: 15 })
-      .withMessage("Password must be between 5 and 15 characters")
-      .notEmpty()
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,15}$/)
-      .withMessage(
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-      ),
+      .isLength({ min: 6, max: 15 })
+      .withMessage("Password must be between 6 and 15 characters")
+      .notEmpty(),
   ];
 }
 function validateMiddleware(req, res, next) {
